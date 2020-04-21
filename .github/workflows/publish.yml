@@ -19,7 +19,7 @@ jobs:
     - name: Set repository
       run: echo ::set-env name=REPOSITORY::${GITHUB_REPOSITORY,,}
     - name: Build image
-      run: docker build -t docker.pkg.github.com/${REPOSITORY}/${IMAGE_NAME}:${VERSION} 
+      run: docker build -t docker.pkg.github.com/${REPOSITORY}/${IMAGE_NAME}:${VERSION} .
     - name: Log into registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
     - name: Push image
