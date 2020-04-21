@@ -16,7 +16,8 @@
     "mime-types": "latest",
     "moment": "latest",
     "nedb": "latest",
-    "nodemailer": "latest"
+    "nodemailer": "latest",
+    "node-docker-api": "latest"
   },
   "engines": {
     "node": "latest"

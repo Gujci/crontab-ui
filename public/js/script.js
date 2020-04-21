@@ -29,6 +29,7 @@ function messageBox(body, title, ok_text, close_text, callback){
 // TODO get rid of global variables
 var schedule = "";
 var job_command = "";
+var job_container = null;
 
 function deleteJob(_id){
 	// TODO fix this. pass callback properly
@@ -94,7 +95,18 @@ function editJob(_id){
 	if(job){
 		$("#job").modal("show");
 		$("#job-name").val(job.name);
-		$("#job-command").val(job.command);
+		var command, container;
+		if (job.command.indexOf("docker exec -t") === 0) {
+			var [_docker, exec, t, containerPart, ...commandParts] =  job.command.split(" ");
+			command = commandParts.join(" ");
+			container = containerPart;
+		}
+		else {
+			command = job.command;
+			container = null;
+		}
+		$("#job-command").val(command);
+		$("#job-container").val(container);
 		// if macro not used
 		if(job.schedule.indexOf("@") !== 0){
 			var components = job.schedule.split(" ");
@@ -108,7 +120,8 @@ function editJob(_id){
 			$("#job-mailing").attr("data-json", JSON.stringify(job.mailing));
 		}
 		schedule = job.schedule;
-		job_command = job.command;
+		job_command = command;
+		job_container = container;
 		if (job.logging && job.logging != "false")
 			$("#job-logging").prop("checked", true);
 		job_string();
@@ -121,9 +134,10 @@ function editJob(_id){
 			schedule = "* * * * *";
 		}
 		let name = $("#job-name").val();
+		let job_container = $("#job-container").val() !== '' ? $("#job-container").val() : null;
 		let mailing = JSON.parse($("#job-mailing").attr("data-json"));
 		let logging = $("#job-logging").prop("checked");
-		$.post(routes.save, {name: name, command: job_command , schedule: schedule, _id: _id, logging: logging, mailing: mailing}, function(){
+		$.post(routes.save, {name: name, command: job_command, container: job_container, schedule: schedule, _id: _id, logging: logging, mailing: mailing}, function(){
 			location.reload();
 		});
 	});
@@ -132,6 +146,7 @@ function editJob(_id){
 function newJob(){
 	schedule = "";
 	job_command = "";
+	job_container = null;
 	$("#job-minute").val("*");
 	$("#job-hour").val("*");
 	$("#job-day").val("*");
@@ -140,6 +155,7 @@ function newJob(){
 
 	$("#job").modal("show");
 	$("#job-name").val("");
+	$("#job-container").val("");
 	$("#job-command").val("");
 	$("#job-mailing").attr("data-json", "{}");
 	job_string();
@@ -150,9 +166,10 @@ function newJob(){
 			schedule = "* * * * *";
 		}
 		let name = $("#job-name").val();
+		let job_container = $("#job-container").val();
 		let mailing = JSON.parse($("#job-mailing").attr("data-json"));
 		let logging = $("#job-logging").prop("checked");
-		$.post(routes.save, {name: name, command: job_command , schedule: schedule, _id: -1, logging: logging, mailing: mailing}, function(){
+		$.post(routes.save, {name: name, command: job_command, container: job_container, schedule: schedule, _id: -1, logging: logging, mailing: mailing}, function(){
 			location.reload();
 		});
 	});
@@ -263,8 +280,9 @@ function setHookConfig(a){
 
 // script corresponding to job popup management
 function job_string(){
-	$("#job-string").val(schedule + " " + job_command);
-	return schedule + " " + job_command;
+	var command = job_container && job_container !== '' && "docker exec -t " + job_container + " " + job_command || job_command;
+	$("#job-string").val(schedule + " " + command);
+	return schedule + " " + command;
 }
 
 function set_schedule(){

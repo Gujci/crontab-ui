@@ -15,6 +15,11 @@ RUN   apk --no-cache add \
       npm \
       supervisor
 
+ENV DOCKERVERSION=18.03.1-ce
+
+RUN curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKERVERSION}.tgz | \
+    tar zxvf - --strip 1 -C /usr/bin docker/docker
+
 COPY supervisord.conf /etc/supervisord.conf
 COPY . /crontab-ui
 

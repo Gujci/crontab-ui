@@ -11,11 +11,13 @@
 <script type="text/javascript">
 	var crontabs = [];
 	var routes = [];
+	var containers = [];
 	$(function () {
 		// initialize tooltips
 		$('[data-toggle="tooltip"]').tooltip();
 		crontabs = JSON.parse('<%- crontabs.replace(/\\\\/g, "\\\\\\\\").replace(/\\\"/g,"\\\\\"").replace(/\'/g,"\\\'").replace(/\\t/g, " ") %>');
 		routes = JSON.parse('<%- routes %>');
+		containers = JSON.parse('<%- containers %>');
 		$("#env_vars").val(`<%- env  %>`);
 	})
 </script>
